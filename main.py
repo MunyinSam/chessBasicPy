@@ -112,11 +112,11 @@ def check_options(pieces, locations, turn):
             moves_list = check_pawn(location, turn)
         elif piece == 'rook':
             moves_list = check_rook(location, turn)
-        '''elif piece == 'knight':
+        elif piece == 'knight':
             moves_list = check_knight(location, turn)
         elif piece == 'bishop':
             moves_list = check_bishop(location, turn)
-        elif piece == 'queen':
+        '''elif piece == 'queen':
             moves_list = check_queen(location, turn)
         elif piece == 'king':
             moves_list = check_king(location, turn)'''
@@ -224,7 +224,7 @@ def check_rook(position, color):
             0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7: 
                 # first line is checking any direction if we can go or not
                 #check if its in between legal space and can move there
-                moves_list.append(position[0] + (chain * x), position[1] + (chain * y))
+                moves_list.append((position[0] + (chain * x), position[1] + (chain * y)))
                 if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
                     path = False
                 chain += 1
@@ -232,7 +232,66 @@ def check_rook(position, color):
                 path = False
     return moves_list
 
+def check_knight(position, color):
+    moves_list = []
+    if color == 'white':
+        enemies_list = black_locations
+        friends_list = white_locations
+    else:
+        friends_list = black_locations
+        enemies_list = white_locations
 
+        #move sets for knight
+    targets = [(1,2), (1, -2), (2, 1), (2, -1),(-1, 2), (-1, -2), (-2, 1), (-2, -1)]
+    for i in range(8):  
+        #check the x pos of the target 0 of the index targets[i]
+        target = (position[0] + targets[i][0] , position[1] + targets[i][1] )
+        # target[0] x axis
+        if target not in friends_list and 0 <= target[0] <= 7 and 0 <= target[1] <= 7:
+            moves_list.append(target)
+
+
+    return moves_list
+
+def check_bishop(position, color):
+    moves_list = []
+    if color == 'white':
+        enemies_list = black_locations
+        friends_list = white_locations
+    else:
+        friends_list = black_locations
+        enemies_list = white_locations
+
+    for i in range(4): #check up-right up-left down-right down-left
+        path = True
+        chain = 1
+        if i == 0:
+            x = 1
+            y = -1
+        elif i == 1:
+            x = -1
+            y = -1
+        elif i == 2:
+            x = 1
+            y = 1
+        else:
+            x = -1
+            y = 1
+        while path: #literally the same as rook
+            if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and \
+            0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7: 
+                # first line is checking any direction if we can go or not
+                #check if its in between legal space and can move there
+                moves_list.append((position[0] + (chain * x), position[1] + (chain * y)))
+                if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
+                    path = False
+                chain += 1
+            else:
+                path = False
+
+    
+    return moves_list
+    
 # check for valid moves for just selected piece
 def check_valid_moves():
     if turn_step < 2:
@@ -275,6 +334,8 @@ while run:
             y_coord = event.pos[1] // 100
             clicks_coords = (x_coord, y_coord)
 
+
+            # piece taking
             if turn_step <= 1: #like turn_step<2
                 if clicks_coords in white_locations:
                     selection = white_locations.index(clicks_coords)
