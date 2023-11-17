@@ -116,10 +116,10 @@ def check_options(pieces, locations, turn):
             moves_list = check_knight(location, turn)
         elif piece == 'bishop':
             moves_list = check_bishop(location, turn)
-        '''elif piece == 'queen':
+        elif piece == 'queen':
             moves_list = check_queen(location, turn)
         elif piece == 'king':
-            moves_list = check_king(location, turn)'''
+            moves_list = check_king(location, turn)
             
         all_moves_list.append(moves_list)
 
@@ -194,7 +194,7 @@ def check_pawn(position, color):
 
     return moves_list
 
-
+# check rook legal moves
 def check_rook(position, color):
     moves_list = []
     if color == 'white':
@@ -232,6 +232,7 @@ def check_rook(position, color):
                 path = False
     return moves_list
 
+# check knight legal moves
 def check_knight(position, color):
     moves_list = []
     if color == 'white':
@@ -253,6 +254,7 @@ def check_knight(position, color):
 
     return moves_list
 
+# checks bishop legal moves
 def check_bishop(position, color):
     moves_list = []
     if color == 'white':
@@ -292,6 +294,38 @@ def check_bishop(position, color):
     
     return moves_list
     
+# checks queen legal moves
+def check_queen(position, color):
+    moves_list = check_bishop(position, color)
+    second_list = check_rook(position, color)
+    for i in range(len(second_list)):
+        moves_list.append(second_list[i])
+    
+    # u can return second list but it wont give u any bishop move cause theres no var that except seocnd list
+    return moves_list
+
+# checks king legal moves
+def check_king(position, color):
+    
+    moves_list = []
+    if color == 'white':
+        enemies_list = black_locations
+        friends_list = white_locations
+    else:
+        friends_list = black_locations
+        enemies_list = white_locations
+
+    # 8 square available
+    targets = [(1,0), (1, 1), (1, -1), (-1, 0),(-1, 1), (-1, -1), (0, 1), (0, -1)]
+    for i in range(8):  
+        #check the x pos of the target 0 of the index targets[i]
+        target = (position[0] + targets[i][0] , position[1] + targets[i][1] )
+        # target[0] x axis
+        if target not in friends_list and 0 <= target[0] <= 7 and 0 <= target[1] <= 7:
+            moves_list.append(target)
+
+    return moves_list
+
 # check for valid moves for just selected piece
 def check_valid_moves():
     if turn_step < 2:
@@ -311,6 +345,18 @@ def draw_valid(moves):
     for i in range(len(moves)):
         pygame.draw.circle(screen, color, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
 
+# draw captured pieces on the side of the screen
+def draw_captured():
+    for i in range(len(captured_pieces_white)):
+        captured_piece = captured_pieces_white[i]
+        index = piece_list.index(captured_piece)
+        screen.blit(small_black_images[index], (825, 5 + 50*i))
+
+    for i in range(len(captured_pieces_black)):
+        captured_piece = captured_pieces_black[i]
+        index = piece_list.index(captured_piece)
+        screen.blit(small_white_images[index], (925, 5 + 50*i))
+
 
 #main gameloop
 black_options = check_options(black_pieces, black_locations, 'black')
@@ -321,6 +367,7 @@ while run:
     screen.fill('dark grey')
     draw_board()
     draw_pieces()
+    draw_captured()
     if selection != 100:
         valid_moves = check_valid_moves()
         draw_valid(valid_moves)
