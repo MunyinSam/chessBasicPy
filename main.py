@@ -78,6 +78,12 @@ piece_list = ["pawn", "queen", "king", "knight", "rook", "bishop"]
 #check variable/ flashing counter
 
 
+# check var / flashing counter
+
+counter = 0     
+
+
+
 # draw main game board
 def draw_board():
     for i in range(32):
@@ -357,6 +363,27 @@ def draw_captured():
         index = piece_list.index(captured_piece)
         screen.blit(small_white_images[index], (925, 5 + 50*i))
 
+# draw a flashing square around the king
+def draw_check():
+
+    if turn_step < 2:
+        king_index = white_pieces.index('king')
+        king_location = white_locations[king_index]
+        for i in range(len(black_options)): #all of the black pieces and the current move
+            if king_location in black_options[i]:
+                if counter < 15:  # itll flutter red cause counter
+                    pygame.draw.rect(screen, 'dark red', [white_locations[king_index][0] * 100 + 1, 
+                                                          white_locations[king_index][1] * 100 + 1, 100, 100], 5)
+    else:
+        king_index = black_pieces.index('king')
+        king_location = black_locations[king_index]
+        for i in range(len(white_options)): #all of the black pieces and the current move
+            if king_location in white_options[i]:
+                if counter < 15:
+                    pygame.draw.rect(screen, 'dark blue', [black_locations[king_index][0] * 100 + 1, 
+                                                          black_locations[king_index][1] * 100 + 1, 100, 100], 5)
+    
+
 
 #main gameloop
 black_options = check_options(black_pieces, black_locations, 'black')
@@ -364,10 +391,17 @@ white_options = check_options(white_pieces, white_locations, 'white')
 run = True
 while run:
     timer.tick(fps)
+
+    if counter < 30:
+        counter += 1
+    else:
+        counter = 0
+    
     screen.fill('dark grey')
     draw_board()
     draw_pieces()
     draw_captured()
+    draw_check()
     if selection != 100:
         valid_moves = check_valid_moves()
         draw_valid(valid_moves)
