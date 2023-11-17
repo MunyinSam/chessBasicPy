@@ -102,8 +102,28 @@ def draw_board():
             pygame.draw.line(screen, 'black', (100 * i, 0), (100 * i , 800), 2) # x axis
 
 # function to check legal moves
-def check_options():
-    pass
+def check_options(pieces, locations, turn):
+    moves_list = []
+    all_moves_list = []
+    for i in range((pieces)):
+        location = locations[i]
+        piece = pieces[i]
+        if piece == 'pawn':
+            moves_list = check_pawn(location, turn)
+        elif piece == 'rook':
+            moves_list = check_rook(location, turn)
+        elif piece == 'knight':
+            moves_list = check_knight(location, turn)
+        elif piece == 'bishop':
+            moves_list = checl_bishop(location, turn)
+        elif piece == 'queen':
+            moves_list = check_queen(location, turn)
+        elif piece == 'king':
+            moves_list = check_king(location, turn)
+            
+        all_moves_list.append(moves_list)
+
+    return all_moves_list
 
 # draw pieces on board
 def draw_pieces():
@@ -138,6 +158,8 @@ def draw_pieces():
 
 
 #main gameloop
+black_options = check_options(black_pieces, black_locations, 'black')
+white_options = check_options(white_pieces, white_locations, 'white')
 run = True
 while run:
     timer.tick(fps)
