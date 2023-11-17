@@ -27,7 +27,7 @@ captured_pieces_black = []
 
 # 0 - white turn, no selection: 1-whites turn piece selected: 2- black turn no selection, 3 - black turn piece selected
 turn_step = 0
-selection = 100
+selection = 10
 valid_moves = []
 
 # load in game piece images 
@@ -101,16 +101,69 @@ def draw_board():
             pygame.draw.line(screen, 'black', (0, 100 * i), (800, 100 * i), 2) #thickness 2 on y axis
             pygame.draw.line(screen, 'black', (100 * i, 0), (100 * i , 800), 2) # x axis
 
+
+# draw pieces on board
+def draw_pieces():
+    for i in range(len(white_pieces)):
+        index = piece_list.index(white_pieces[i])
+        if white_pieces[i] == 'pawn':
+            screen.blit(white_pawn, (white_locations[i][0] * 100 + 22, white_locations[i][1] * 100 + 30)) 
+            #if your changing the screen size needs to change
+        else: #print things that isnt a pawn
+            screen.blit(white_images[index], (white_locations[i][0] * 100 + 10, white_locations[i][1] * 100 + 10))
+
+        if turn_step < 2:
+            if selection == i:
+                pygame.draw.rect(screen, 'red', [white_locations[i][0] * 100 + 1, white_locations[i][1] * 100 + 1,
+                                                 100 , 100], 2) 
+
+
+# selection for pieces
+    for i in range(len(black_pieces)):
+        index = piece_list.index(black_pieces[i])
+        if black_pieces[i] == 'pawn':
+            screen.blit(black_pawn, (black_locations[i][0] * 100 + 22, black_locations[i][1] * 100 + 30)) 
+            #if your changing the screen size needs to change
+        else: #print things that isnt a pawn
+            screen.blit(black_images[index], (black_locations[i][0] * 100 + 10, black_locations[i][1] * 100 + 10)) 
+        
+        if turn_step >= 2:
+            if selection == i:
+                pygame.draw.rect(screen, 'blue', [black_locations[i][0] * 100 + 1, black_locations[i][1] * 100 + 1,
+                                                 100 , 100], 2) 
+
+
 #main gameloop
 run = True
 while run:
     timer.tick(fps)
     screen.fill('dark grey')
     draw_board()
+    draw_pieces()
     
     for event in pygame.event.get(): # getting all input
         if event.type == pygame.QUIT: # prebuilt pygame
             run = False
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # left click
+            x_coord = event.pos[0] // 100 #each grid is 100 wide and floor division will round down
+            y_coord = event.pos[1] // 100
+            clicks_coords = (x_coord, y_coord)
+            if turn_step <= 1: #like turn_step<2
+                if clicks_coords in white_locations:
+                    selection = white_locations.index(clicks_coords)
+                    if turn_step == 0:
+                        turn_step = 1
+                if clicks_coords in valid_moves and selection != 100: # a square that we are allowed to move
+                    white_locations[selection] = clicks_coords
+
+                    if clicks_coords in black_locations: #white takes black
+                        black_piece = black_locations.index(clicks_coords) # checking the black piece with this coords
+                        captured_pieces_white.append(black_pieces[black_piece])
+                        black_pieces.pop(black_piece)
+                        black_locations.pop(black_piece)
+
+                    black_options = check_options()
+                    white_options = check_options()
         
     pygame.display.flip()
 pygame.quit()
