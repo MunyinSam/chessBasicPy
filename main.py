@@ -110,9 +110,9 @@ def check_options(pieces, locations, turn):
         piece = pieces[i]
         if piece == 'pawn':
             moves_list = check_pawn(location, turn)
-        '''elif piece == 'rook':
+        elif piece == 'rook':
             moves_list = check_rook(location, turn)
-        elif piece == 'knight':
+        '''elif piece == 'knight':
             moves_list = check_knight(location, turn)
         elif piece == 'bishop':
             moves_list = check_bishop(location, turn)
@@ -192,6 +192,44 @@ def check_pawn(position, color):
         if (position[0] - 1, position[1] - 1) in white_locations: #diagonal left
             moves_list.append((position[0] - 1, position[1] - 1))
 
+    return moves_list
+
+
+def check_rook(position, color):
+    moves_list = []
+    if color == 'white':
+        enemies_list = black_locations
+        friends_list = white_locations
+    else:
+        friends_list = black_locations
+        enemies_list = white_locations
+
+    for i in range(4): #check down up right left
+        path = True
+        chain = 1
+        if i == 0:
+            x = 0
+            y = 1
+        elif i == 1:
+            x = 0
+            y = -1
+        elif i == 2:
+            x = 1
+            y = 0
+        else:
+            x = -1
+            y = 0
+        while path:
+            if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and \
+            0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7: 
+                # first line is checking any direction if we can go or not
+                #check if its in between legal space and can move there
+                moves_list.append(position[0] + (chain * x), position[1] + (chain * y))
+                if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
+                    path = False
+                chain += 1
+            else:
+                path = False
     return moves_list
 
 
