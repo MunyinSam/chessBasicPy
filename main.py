@@ -156,6 +156,56 @@ def draw_pieces():
                 pygame.draw.rect(screen, 'blue', [black_locations[i][0] * 100 + 1, black_locations[i][1] * 100 + 1,
                                                  100 , 100], 2) 
 
+# check legal pawn moves
+def check_pawn(position, color):
+    moves_list = []
+    if color == 'white':
+
+        #(position[0 = x], position[1 = y]) cause we gonna pass in 2 args in pos
+
+        if (position[0], position[1] + 1) not in white_locations and \
+            (position[0], position[1] + 1) not in black_locations and position[1] < 7:
+            moves_list.append(position[0],[position[1] + 1])
+            # moves down
+        if (position[0], position[1] + 2) not in white_locations and \
+            (position[0], position[1] + 2) not in black_locations and position[1] == 1: #starting pos 2 move
+            moves_list.append(position[0],[position[1] + 2])
+        if (position[0] + 1, position[1] + 1) in black_locations: #diagonal left
+            moves_list.append(position[0] + 1,[position[1] + 1])
+        if (position[0] - 1, position[1] + 1) in black_locations: #diagonal right
+            moves_list.append(position[0] - 1,[position[1] + 1])
+    else:
+        if (position[0], position[1] - 1) not in white_locations and \
+            (position[0], position[1] - 1) not in black_locations and position[1] > 0: # check 1 above
+            # 0 is the end of the board above
+            moves_list.append(position[0],[position[1] - 1])
+            # moves down
+        if (position[0], position[1] - 2) not in white_locations and \
+            (position[0], position[1] - 2) not in black_locations and position[1] == 6: #starting pos 2 move
+            moves_list.append(position[0],[position[1] - 2])
+
+        if (position[0] + 1, position[1] - 1) in white_locations: #diagonal right
+            moves_list.append(position[0] - 1,[position[1] - 1])
+
+        if (position[0] - 1, position[1] - 1) in white_locations: #diagonal left
+            moves_list.append(position[0] - 1,[position[1] - 1])
+
+    return moves_list
+
+
+# check for valid moves for just selected piece
+def check_valid_moves():
+    if turn_step < 2:
+        options_list = white_options
+    else:
+        options_list = black_options
+    valid_options =  options_list[selection]
+    return valid_options
+
+
+def draw_valid():
+    pass
+
 
 #main gameloop
 black_options = check_options(black_pieces, black_locations, 'black')
@@ -166,6 +216,10 @@ while run:
     screen.fill('dark grey')
     draw_board()
     draw_pieces()
+    if selection != 100:
+        valid_moves = check_valid_moves()
+        draw_valid(valid_moves)
+    
     
     for event in pygame.event.get(): # getting all input
         if event.type == pygame.QUIT: # prebuilt pygame
