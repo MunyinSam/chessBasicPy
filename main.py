@@ -70,8 +70,8 @@ white_pawn_small = pygame.transform.scale(white_pawn, (45, 45))
 
 white_images = [white_pawn, white_queen, white_king, white_knight, white_rook, white_bishop]
 
-white_promotions = ['bishop','knight','rook','queen']
-black_promotions = ['bishop','knight','rook','queen']
+white_promotions = 'queen'
+black_promotions = 'queen'
 
 small_white_images = [white_pawn_small, white_queen_small, white_king_small, white_knight_small,
                        white_rook_small, white_bishop_small]
@@ -321,6 +321,8 @@ def check_queen(position, color):
     second_list = check_rook(position, color)
     for i in range(len(second_list)):
         moves_list.append(second_list[i])
+
+ 
     
     # u can return second list but it wont give u any bishop move cause theres no var that except seocnd list
     return moves_list
@@ -447,20 +449,21 @@ def check_promotion():
 
 
 def draw_promotion(): # draw the promotion option screen
-    pygame.draw.rect(screen, 'dark gray', [800, 0, 200, 420]) # draw a rect on top of the score board
+   # pygame.draw.rect(screen, 'dark gray', [800, 0, 200, 420]) # draw a rect on top of the score board
     if white_promote:
         color = 'white'
-        for i in range(len(white_promotions)):
-            piece = white_promotions[i]
-            index = piece_list.index(piece)
-            screen.blit(white_images[index], (860, 5 + 100 * i))
+        
+        piece = white_promotions
+        index = piece_list.index(piece)
+            #screen.blit(white_images[index], (860, 5 + 100 * i))
+
     elif black_promote:
         color = 'black'
-        for i in range(len(black_promotions)):
-            piece = black_promotions[i]
-            index = piece_list.index(piece)
-            screen.blit(black_images[index], (860, 5 + 100 * i))
-    pygame.draw.rect(screen, color, [800, 0, 200, 420], 6)
+        
+        piece = black_promotions
+        index = piece_list.index(piece)
+            #screen.blit(black_images[index], (860, 5 + 100 * i))
+    #pygame.draw.rect(screen, color, [800, 0, 200, 420], 6)
 
 
 def check_promo_select():
@@ -468,10 +471,11 @@ def check_promo_select():
     left_click = pygame.mouse.get_pressed()[0]
     x_pos = mouse_pos[0] // 100 #cause our square is 100 wide
     y_pos = mouse_pos[1] // 100
-    if white_promote and left_click and x_pos >7 and y_pos < 4:
-        white_pieces[promo_index] = white_promotions[y_pos]
-    elif white_promote and left_click and x_pos >7 and y_pos < 4:
-        black_pieces[promo_index] = black_promotions[y_pos]
+    if white_promote and y_pos >7:
+        white_pieces[promo_index] = white_pieces[4]
+        print("Yes")
+    elif black_promote and y_pos <7:
+        black_pieces[promo_index] = black_pieces[4]
 
 
 #main gameloop
