@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 WIDTH = 1000
 HEIGHT = 900
-screen = pygame.display.set_mode([WIDTH,HEIGHT] , pygame.FULLSCREEN)
+screen = pygame.display.set_mode([WIDTH,HEIGHT], pygame.RESIZABLE)
 pygame.display.set_caption('Two Player pygame Chess')
 font = pygame.font.Font('freesansbold.ttf', 20)
 big_font = pygame.font.Font('freesansbold.ttf', 50)
@@ -69,6 +69,10 @@ white_pawn = pygame.transform.scale(white_pawn, (65, 65))
 white_pawn_small = pygame.transform.scale(white_pawn, (45, 45))
 
 white_images = [white_pawn, white_queen, white_king, white_knight, white_rook, white_bishop]
+
+white_promotions = ['bishop','knight','rook','queen']
+black_promotions = ['bishop','knight','rook','queen']
+
 small_white_images = [white_pawn_small, white_queen_small, white_king_small, white_knight_small,
                        white_rook_small, white_bishop_small]
 black_images = [black_pawn, black_queen, black_king, black_knight, black_rook, black_bishop]
@@ -83,6 +87,11 @@ piece_list = ["pawn", "queen", "king", "knight", "rook", "bishop"]
 counter = 0     
 winner = ''
 game_over = False
+white_ep = (100, 100)
+black_ep = (100, 100)
+white_promote = False
+black_promote = False
+promo_index = 100
 
 
 # draw main game board
@@ -108,6 +117,11 @@ def draw_board():
             pygame.draw.line(screen, 'black', (0, 100 * i), (800, 100 * i), 2) #thickness 2 on y axis
             pygame.draw.line(screen, 'black', (100 * i, 0), (100 * i , 800), 2) # x axis
         screen.blit(big_font.render('Resign', True, 'black'), (810, 825))
+
+        if white_promote or black_promote:
+            pygame.draw.rect(screen, 'gray', [0, 800, WIDTH-200, 100])
+            pygame.draw.rect(screen, 'black', [0, 800, WIDTH-200, 100], 5)
+            screen.blit(big_font.render('Select piece to promote', True, 'black'), (20,820))
 
 # function to check legal moves
 def check_options(pieces, locations, turn):
@@ -167,8 +181,10 @@ def draw_pieces():
 # check legal pawn moves
 def check_pawn(position, color):
     moves_list = []
+    
     if color == 'white':
 
+        
         #(position[0 = x], position[1 = y]) cause we gonna pass in 2 args in pos
 
         if (position[0], position[1] + 1) not in white_locations and \
@@ -181,6 +197,10 @@ def check_pawn(position, color):
             moves_list.append((position[0] + 1, position[1] + 1))
         if (position[0] - 1, position[1] + 1) in black_locations:
             moves_list.append((position[0] - 1, position[1] + 1))
+
+        # promote
+
+
     else:
         if (position[0], position[1] - 1) not in white_locations and \
                 (position[0], position[1] - 1) not in black_locations and position[1] > 0:
@@ -193,6 +213,7 @@ def check_pawn(position, color):
         if (position[0] - 1, position[1] - 1) in white_locations:
             moves_list.append((position[0] - 1, position[1] - 1))
     return moves_list
+    
 
 # check rook legal moves
 def check_rook(position, color):
@@ -343,7 +364,18 @@ def draw_valid(moves):
     else:
         color = 'blue'
     for i in range(len(moves)):
-        pygame.draw.circle(screen, color, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
+
+        if turn_step < 2:
+
+            pygame.draw.rect(screen, 'red', [moves[i][0] * 100 + 1, 
+                                                            moves[i][1] * 100 + 1, 100, 100], 7)
+        #pygame.draw.circle(screen, color, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
+
+        else:
+            pygame.draw.rect(screen, 'blue', [moves[i][0] * 100 + 1, 
+                                                            moves[i][1] * 100 + 1, 100, 100], 7)
+
+
 
 # draw captured pieces on the side of the screen
 def draw_captured():
@@ -360,7 +392,6 @@ def draw_captured():
 # draw a flashing square around the king
 def draw_check():
 
-    
     if turn_step < 2:
         if 'king' in white_pieces:
 
@@ -371,6 +402,8 @@ def draw_check():
                     if counter < 15:  # itll flutter red cause counter
                         pygame.draw.rect(screen, 'dark red', [white_locations[king_index][0] * 100 + 1, 
                                                             white_locations[king_index][1] * 100 + 1, 100, 100], 5)
+
+
     else:
         if 'king' in black_pieces:
 
@@ -381,13 +414,66 @@ def draw_check():
                     if counter < 15:
                         pygame.draw.rect(screen, 'dark blue', [black_locations[king_index][0] * 100 + 1, 
                                                             black_locations[king_index][1] * 100 + 1, 100, 100], 5)
-    
+
+
+
 def draw_game_over():
     pygame.draw.rect(screen, 'black', [200, 200, 400, 70])
     screen.blit(font.render(f'{winner} won the game!', True, 'white'), (210, 210))
     screen.blit(font.render(f'Press ENTER to Restart!', True, 'white'), (210, 240))
 
- 
+def check_promotion():
+    pawn_indexes = []
+    white_promotion = False
+    black_promotion = False
+    promote_index = 100
+    for i in range(len(white_pieces)):
+        if white_pieces[i] == 'pawn':
+            pawn_indexes.append(i)
+    for i in range(len(pawn_indexes)):
+        if white_locations[pawn_indexes[i]][1] == 7:
+            white_promotion = True
+            promote_index = pawn_indexes[i]
+    pawn_indexes = []
+    for i in range(len(black_pieces)):
+        if black_pieces[i] == 'pawn':
+            pawn_indexes.append(i)
+    for i in range(len(pawn_indexes)):
+        if black_locations[pawn_indexes[i]][1] == 0:
+            black_promotion = True
+            promote_index = pawn_indexes[i]
+    return white_promotion, black_promotion, promote_index
+
+
+
+def draw_promotion(): # draw the promotion option screen
+    pygame.draw.rect(screen, 'dark gray', [800, 0, 200, 420]) # draw a rect on top of the score board
+    if white_promote:
+        color = 'white'
+        for i in range(len(white_promotions)):
+            piece = white_promotions[i]
+            index = piece_list.index(piece)
+            screen.blit(white_images[index], (860, 5 + 100 * i))
+    elif black_promote:
+        color = 'black'
+        for i in range(len(black_promotions)):
+            piece = black_promotions[i]
+            index = piece_list.index(piece)
+            screen.blit(black_images[index], (860, 5 + 100 * i))
+    pygame.draw.rect(screen, color, [800, 0, 200, 420], 6)
+
+
+def check_promo_select():
+    mouse_pos = pygame.mouse.get_pos()
+    left_click = pygame.mouse.get_pressed()[0]
+    x_pos = mouse_pos[0] // 100 #cause our square is 100 wide
+    y_pos = mouse_pos[1] // 100
+    if white_promote and left_click and x_pos >7 and y_pos < 4:
+        white_pieces[promo_index] = white_promotions[y_pos]
+    elif white_promote and left_click and x_pos >7 and y_pos < 4:
+        black_pieces[promo_index] = black_promotions[y_pos]
+
+
 #main gameloop
 black_options = check_options(black_pieces, black_locations, 'black')
 white_options = check_options(white_pieces, white_locations, 'white')
@@ -405,6 +491,12 @@ while run:
     draw_pieces()
     draw_captured()
     draw_check()
+    if not game_over:
+        white_promote, black_promote, promo_index = check_promotion()
+        if white_promote or black_promote:
+            draw_promotion()
+            check_promo_select()
+            
     if selection != 100:
         valid_moves = check_valid_moves()
         draw_valid(valid_moves)
@@ -491,6 +583,7 @@ while run:
 
                 black_options = check_options(black_pieces, black_locations, 'black')
                 white_options = check_options(white_pieces, white_locations, 'white')
+            
 
 
     if winner != '':
